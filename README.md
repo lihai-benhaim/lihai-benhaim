@@ -55,8 +55,9 @@
 ### 📊 GitHub stats
 
 <p align="center">
-  <img height="165" src="https://github-readme-stats.vercel.app/api?username=lihai-benhaim&show_icons=true&theme=tokyonight&hide_border=true&count_private=true" alt="stats"/>
-  <img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=lihai-benhaim&layout=compact&theme=tokyonight&hide_border=true" alt="top languages"/>
+  <img src="https://img.shields.io/github/followers/lihai-benhaim?style=for-the-badge&logo=github&label=Followers&color=1f6feb" alt="followers"/>
+  <img src="https://img.shields.io/github/stars/lihai-benhaim/mongodb-snapshot?style=for-the-badge&logo=github&label=%E2%98%85%20mongodb-snapshot&color=e3b341" alt="stars on mongodb-snapshot"/>
+  <img src="https://img.shields.io/npm/dm/mongodb-snapshot?style=for-the-badge&logo=npm&label=npm%20downloads&color=cb3837" alt="npm downloads"/>
 </p>
 
 ---
