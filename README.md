@@ -8,6 +8,7 @@
 <p align="center">
   <a href="https://www.linkedin.com/in/lihaibh/"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/></a>
   <a href="https://www.npmjs.com/~lihaibh"><img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white" alt="npm"/></a>
+  <a href="https://github.com/lihai-benhaim"><img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/></a>
   <img src="https://img.shields.io/badge/Israel-0038B8?style=for-the-badge&logo=googlemaps&logoColor=white" alt="Israel"/>
 </p>
 
@@ -43,19 +44,19 @@
 
 | Project | What it does | Stack |
 | --- | --- | --- |
-| **[mongodb-snapshot](https://github.com/lihaibh/mongodb-snapshot)** ⭐51 | An NPM library to manage MongoDB snapshots easily and efficiently. [On npm »](https://www.npmjs.com/package/mongodb-snapshot) | TypeScript |
-| **[traceable](https://github.com/lihaibh/traceable)** | Trace an object's state over time using reactive (Rx) streams. | TypeScript · RxJS |
-| **[game-of-life](https://github.com/lihaibh/game-of-life)** | A clean console implementation of Conway's Game of Life. | JavaScript |
-| **[blueribbon-challenge-flightapp](https://github.com/lihaibh/blueribbon-challenge-flightapp)** | A RESTful flight service built with Spring Boot. | Java · Spring Boot |
-| **[practice-challenges](https://github.com/lihaibh/practice-challenges)** | Coding challenges and language practice. | Java |
+| **[mongodb-snapshot](https://github.com/lihai-benhaim/mongodb-snapshot)** ⭐51 | An NPM library to manage MongoDB snapshots easily and efficiently. [On npm »](https://www.npmjs.com/package/mongodb-snapshot) | TypeScript |
+| **[traceable](https://github.com/lihai-benhaim/traceable)** | Trace an object's state over time using reactive (Rx) streams. | TypeScript · RxJS |
+| **[game-of-life](https://github.com/lihai-benhaim/game-of-life)** | A clean console implementation of Conway's Game of Life. | JavaScript |
+| **[blueribbon-challenge-flightapp](https://github.com/lihai-benhaim/blueribbon-challenge-flightapp)** | A RESTful flight service built with Spring Boot. | Java · Spring Boot |
+| **[practice-challenges](https://github.com/lihai-benhaim/practice-challenges)** | Coding challenges and language practice. | Java |
 
 ---
 
 ### 📊 GitHub stats
 
 <p align="center">
-  <img height="165" src="https://github-readme-stats.vercel.app/api?username=lihaibh&show_icons=true&theme=tokyonight&hide_border=true&count_private=true" alt="stats"/>
-  <img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=lihaibh&layout=compact&theme=tokyonight&hide_border=true" alt="top languages"/>
+  <img height="165" src="https://github-readme-stats.vercel.app/api?username=lihai-benhaim&show_icons=true&theme=tokyonight&hide_border=true&count_private=true" alt="stats"/>
+  <img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=lihai-benhaim&layout=compact&theme=tokyonight&hide_border=true" alt="top languages"/>
 </p>
 
 ---
