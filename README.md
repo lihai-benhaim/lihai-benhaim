@@ -99,6 +99,10 @@
   <img height="165" src="https://github-readme-stats-lihaibenhaim-projects.vercel.app/api/top-langs/?username=lihai-benhaim&layout=compact&theme=tokyonight&hide_border=true" alt="Top languages"/>
 </p>
 
+<p align="center">
+  <img src="./github-metrics.svg" alt="GitHub metrics"/>
+</p>
+
 ---
 
 <p align="center"><i>Open to interesting problems and collaboration. Let's build something.</i></p>
