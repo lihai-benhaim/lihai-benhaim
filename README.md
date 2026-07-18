@@ -94,6 +94,10 @@
   <img src="https://img.shields.io/npm/dm/mongodb-snapshot?style=for-the-badge&logo=npm&label=npm%20downloads&color=cb3837" alt="npm downloads"/>
 </p>
 
+<p align="center">
+  <img src="./github-metrics.svg" alt="Full-year commit calendar and lines of code"/>
+</p>
+
 ---
 
 <p align="center"><i>Open to interesting problems and collaboration. Let's build something.</i></p>
