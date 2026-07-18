@@ -1,0 +1,42 @@
+name: Metrics
+
+on:
+  # Daily at 06:00 UTC
+  schedule:
+    - cron: "0 6 * * *"
+  # Let you trigger it manually from the Actions tab
+  workflow_dispatch:
+
+# committer_token (GITHUB_TOKEN) needs write to push the generated SVG.
+# Scoped to THIS repo only.
+permissions:
+  contents: write
+
+jobs:
+  github-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned to the exact commit for v3.34 (immutable), NOT a moving tag.
+      - uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6
+        with:
+          # ---- SECURITY-CRITICAL SETTINGS ----
+          # A brand-new classic PAT with ZERO scopes checked. Powerless if stolen.
+          token: ${{ secrets.METRICS_TOKEN }}
+          # Auto per-repo token, scoped to this public repo only, used to commit the SVG.
+          committer_token: ${{ secrets.GITHUB_TOKEN }}
+          # Build the image locally from the pinned commit's Dockerfile instead of
+          # pulling the mutable ghcr.io/lowlighter/metrics:v3.34 image. This removes
+          # the moving image tag from the trust path: only code frozen at the pinned
+          # SHA runs. Costs ~2-4 min build time per run (fine for a daily cron).
+          use_prebuilt_image: "no"
+
+          # ---- WHOSE METRICS ----
+          user: lihai-benhaim
+
+          # ---- PANELS ----
+          base: header, activity, community, repositories, metadata
+          # Full-year contribution calendar (public contributions only)
+          plugin_isocalendar: "yes"
+          plugin_isocalendar_duration: full-year
+
+          config_timezone: Asia/Jerusalem
