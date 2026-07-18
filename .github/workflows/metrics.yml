@@ -4,7 +4,7 @@ on:
   # Daily at 06:00 UTC
   schedule:
     - cron: "0 6 * * *"
-  # Let you trigger it manually from the Actions tab
+  # Manual trigger from the Actions tab
   workflow_dispatch:
 
 # committer_token (GITHUB_TOKEN) needs write to push the generated SVG.
@@ -16,18 +16,28 @@ jobs:
   github-metrics:
     runs-on: ubuntu-latest
     steps:
-      # Pinned to the exact commit for v3.34 (immutable), NOT a moving tag.
+      # --- SECURITY: pin the executed image by immutable digest ---
+      # Pull lowlighter/metrics v3.34 BY DIGEST (frozen bytes, cannot change even if
+      # someone re-pushes the :v3.34 tag later) and tag it as the exact local name the
+      # action resolves to. This makes the action run precisely these bytes and skip
+      # both the (flaky) registry pull and the (stale 2023) local Dockerfile build.
+      - name: Pull pinned metrics image by digest
+        run: |
+          set -euo pipefail
+          IMG="ghcr.io/lowlighter/metrics@sha256:257392f90340f916cb8b815026f259399f6b246d3eb7de38b58bfe7a07bd5b65"
+          docker pull "$IMG"
+          docker tag "$IMG" metrics:3.34.0
+
+      # Action pinned to the exact commit for v3.34 (immutable), NOT a moving tag.
       - uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6
         with:
           # ---- SECURITY-CRITICAL SETTINGS ----
-          # A brand-new classic PAT with ZERO scopes checked. Powerless if stolen.
+          # Classic PAT with ZERO scopes. Powerless if stolen (reads public data only).
           token: ${{ secrets.METRICS_TOKEN }}
           # Auto per-repo token, scoped to this public repo only, used to commit the SVG.
           committer_token: ${{ secrets.GITHUB_TOKEN }}
-          # Build the image locally from the pinned commit's Dockerfile instead of
-          # pulling the mutable ghcr.io/lowlighter/metrics:v3.34 image. This removes
-          # the moving image tag from the trust path: only code frozen at the pinned
-          # SHA runs. Costs ~2-4 min build time per run (fine for a daily cron).
+          # "no" -> action uses the local image name (metrics:3.34.0), which we pre-tagged
+          # to the digest-pinned image above. No registry tag pull, no local build.
           use_prebuilt_image: "no"
 
           # ---- WHOSE METRICS ----
