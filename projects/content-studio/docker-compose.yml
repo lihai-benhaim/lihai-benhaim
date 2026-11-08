@@ -1,0 +1,30 @@
+# Run on the NAS:   docker compose --profile tunnel up -d --build
+# Without tunnel:   docker compose up -d --build   (web studio on http://<nas-ip>:8080, no Instagram/WhatsApp)
+services:
+  studio:
+    build: .
+    image: content-studio:latest
+    container_name: content-studio
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    # The data folder must be writable by this user. On Synology use your user's uid:gid (run `id` over SSH).
+    user: "${STUDIO_UID:-1000}:${STUDIO_GID:-1000}"
+    volumes:
+      - ${STUDIO_DATA_PATH:-./data}:/data
+    ports:
+      - "${STUDIO_PORT:-8080}:8080"
+
+  # Cloudflare Tunnel: gives the studio a public HTTPS address without opening ports on the router.
+  # Instagram needs it to download media; WhatsApp needs it to deliver messages.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: content-studio-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - studio
+    profiles: ["tunnel"]

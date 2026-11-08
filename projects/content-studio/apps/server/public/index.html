@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Content Studio</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #101828; --muted: #667085; --line: #e4e7ec;
+    --accent: #2563eb; --accent-text: #ffffff; --ok: #067647; --warn: #b54708; --err: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b0f17; --panel: #131a26; --text: #e6e9ef; --muted: #98a2b3; --line: #253045;
+      --accent: #5b8cff; --accent-text: #0b0f17; --ok: #47cd89; --warn: #fdb022; --err: #f97066; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--text); }
+  header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { font-size: 18px; margin: 0; }
+  .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .badge.live { color: var(--err); border-color: var(--err); }
+  main { display: grid; grid-template-columns: 340px 1fr; gap: 16px; padding: 16px; max-width: 1200px; margin: 0 auto; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+  h2 { font-size: 15px; margin: 0 0 10px; }
+  textarea, input[type=text], input[type=password] { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: inherit; font: inherit; }
+  textarea { min-height: 90px; resize: vertical; }
+  button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: inherit; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+  .tgroup { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .tgroup .pname { min-width: 80px; font-size: 14px; font-weight: 600; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; }
+  .chip:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+  .chip input { margin: 0; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .list button { display: block; width: 100%; text-align: right; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 10px 4px; }
+  .list button.sel { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .status { font-size: 12px; color: var(--muted); }
+  .preview { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+  .preview video { width: 240px; aspect-ratio: 9/16; background: #000; border-radius: 10px; }
+  .preview img { width: 200px; border-radius: 10px; }
+  .rendition { border-top: 1px solid var(--line); padding: 10px 0; white-space: pre-wrap; }
+  .rendition b { display: block; margin-bottom: 4px; }
+  .issue.error { color: var(--err); } .issue.warning { color: var(--warn); }
+  .acct { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .ok { color: var(--ok); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Content Studio</h1>
+  <span id="mode" class="badge"></span>
+</header>
+
+<div id="gate" class="hidden" style="max-width:420px;margin:40px auto;padding:0 16px">
+  <section>
+    <h2>כניסה</h2>
+    <p class="muted">הדבק את STUDIO_ADMIN_TOKEN מהקובץ .env</p>
+    <input id="token" type="password" autocomplete="off" />
+    <div class="row"><button class="primary" id="saveToken">כניסה</button></div>
+  </section>
+</div>
+
+<main id="app" class="hidden">
+  <div>
+    <section>
+      <h2>מה מפרסמים היום?</h2>
+      <textarea id="brief" placeholder="לדוגמה: סטורי על השקת הפרויקט החדש שלי, משהו אנרגטי וקצר"></textarea>
+      <div class="targets" id="targets"></div>
+      <div class="row"><button class="primary" id="create">צור טיוטה</button></div>
+    </section>
+    <section>
+      <h2>טיוטות</h2>
+      <div class="list" id="drafts"><p class="muted">עדיין אין טיוטות.</p></div>
+    </section>
+    <section>
+      <h2>חשבונות</h2>
+      <div id="accounts"></div>
+    </section>
+  </div>
+  <div>
+    <section id="detail"><p class="muted">בחר טיוטה או צור חדשה.</p></section>
+  </div>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const STATUS = { planning: "מתכנן", awaiting_assets: "מחכה לתמונות", rendering: "מרנדר", awaiting_approval: "מחכה לאישור", approved: "אושר",
+  publishing: "מפרסם", published: "פורסם", partially_published: "פורסם חלקית", failed: "נכשל", cancelled: "בוטל" };
+const TERMINAL = ["published", "partially_published", "failed", "cancelled"];
+const FORMAT = { story: "סטורי", reel: "ריל", short: "שורט", feed_image: "פוסט תמונה", carousel: "קרוסלה", feed_video: "פוסט וידאו", text: "טקסט", pin: "פין" };
+const pname = (id) => platforms.find((p) => p.id === id)?.displayName ?? id;
+// Media links are signed for PUBLIC_BASE_URL; the page loads them relative to wherever it is served.
+const local = (url) => { const u = new URL(url); return u.pathname + u.search; };
+let token = null, platforms = [], selected = null, timer = null;
+try { token = localStorage.getItem("studioToken"); } catch {}
+
+async function api(path, opts = {}) {
+  const res = await fetch(`/api${path}`, { ...opts, headers: { Authorization: `Bearer ${token}`, ...(opts.json ? { "Content-Type": "application/json" } : {}), ...opts.headers },
+    body: opts.json ? JSON.stringify(opts.json) : opts.body });
+  if (res.status === 401) { showGate(); throw new Error("unauthorized"); }
+  const data = res.status === 204 ? null : await res.json();
+  if (!res.ok) throw new Error(data?.message || res.statusText);
+  return data;
+}
+
+function showGate() { $("#gate").classList.remove("hidden"); $("#app").classList.add("hidden"); }
+$("#saveToken").onclick = () => { token = $("#token").value.trim(); try { localStorage.setItem("studioToken", token); } catch {} boot(); };
+
+async function boot() {
+  const health = await fetch("/health").then((r) => r.json());
+  $("#mode").textContent = health.publishMode === "live" ? "פרסום אמיתי" : "Dry run: לא מפרסם באמת";
+  $("#mode").classList.toggle("live", health.publishMode === "live");
+  if (!token) return showGate();
+  try { platforms = await api("/platforms"); } catch { return; }
+  $("#gate").classList.add("hidden"); $("#app").classList.remove("hidden");
+  renderTargets(); renderAccounts(); await loadDrafts();
+  const q = new URLSearchParams(location.search);
+  if (q.get("linked")) history.replaceState(null, "", "/");
+}
+
+function renderTargets() {
+  const defaults = ["instagram:story", "linkedin:feed_video"];
+  $("#targets").innerHTML = platforms.filter((p) => p.available).map((p) => `<div class="tgroup"><span class="pname">${esc(p.displayName)}</span>${p.formats
+    .map((f) => { const id = `${p.id}:${f.format}`; return `<label class="chip"><input type="checkbox" value="${esc(id)}" ${defaults.includes(id) ? "checked" : ""}/>${esc(FORMAT[f.format] ?? f.format)}</label>`; })
+    .join("")}</div>`).join("");
+}
+
+function renderAccounts() {
+  $("#accounts").innerHTML = platforms.map((p) => {
+    if (!p.available) return `<div class="acct"><span>${esc(p.displayName)}</span><span class="muted">בקרוב</span></div>`;
+    if (p.linked) return `<div class="acct"><span>${esc(p.displayName)} <span class="ok">✓ ${esc(p.linked.displayName)}</span></span><button data-unlink="${p.id}">נתק</button></div>`;
+    return `<div class="acct"><span>${esc(p.displayName)}</span><button data-link="${p.id}">חבר</button></div>`;
+  }).join("");
+  $("#accounts").querySelectorAll("[data-link]").forEach((b) => b.onclick = async () => { const { url } = await api(`/connect/${b.dataset.link}`, { method: "POST" }); location.href = url; });
+  $("#accounts").querySelectorAll("[data-unlink]").forEach((b) => b.onclick = async () => { await api(`/accounts/${b.dataset.unlink}`, { method: "DELETE" }); platforms = await api("/platforms"); renderAccounts(); });
+}
+
+async function loadDrafts() {
+  const drafts = await api("/drafts");
+  $("#drafts").innerHTML = drafts.length ? drafts.map((d) => `<button data-id="${d.id}" class="${d.id === selected ? "sel" : ""}">
+    ${esc(d.plan?.title || d.brief.text.slice(0, 50))}<div class="status">${STATUS[d.status]} · ${new Date(d.createdAt).toLocaleString("he-IL")}</div></button>`).join("")
+    : `<p class="muted">עדיין אין טיוטות.</p>`;
+  $("#drafts").querySelectorAll("button").forEach((b) => b.onclick = () => select(b.dataset.id));
+}
+
+$("#create").onclick = async () => {
+  const text = $("#brief").value.trim(); if (!text) return;
+  const targets = [...document.querySelectorAll("#targets input:checked")].map((i) => i.value);
+  const d = await api("/drafts", { method: "POST", json: { text, targets } });
+  $("#brief").value = ""; await loadDrafts(); select(d.id);
+};
+
+async function select(id) { selected = id; clearTimeout(timer); await refresh(); }
+
+async function refresh() {
+  if (!selected) return;
+  const d = await api(`/drafts/${selected}`);
+  renderDetail(d); loadDrafts();
+  if (!TERMINAL.includes(d.status) && d.status !== "awaiting_approval" && d.status !== "awaiting_assets") timer = setTimeout(refresh, 3000);
+}
+
+function renderDetail(d) {
+  const r = d.report; const plan = d.plan;
+  const video = r.mediaUrls.find((m) => m.kind === "video"); const image = r.mediaUrls.find((m) => m.kind === "image");
+  const answered = new Set(d.assets.map((a) => a.requestId));
+  const requests = (plan?.assetRequests || []).map((a) => `<div class="row"><span>${answered.has(a.id) ? "✓" : "•"} ${esc(a.description)}</span>
+      ${answered.has(a.id) ? "" : `<input type="file" accept="image/*,video/*" data-req="${esc(a.id)}"/>`}</div>`).join("");
+  $("#detail").innerHTML = `
+    <h2>${esc(plan?.title || d.brief.text)}</h2>
+    <div class="status">${STATUS[d.status]}${d.revision ? ` · גרסה ${d.revision}` : ""}${d.error ? ` · ${esc(d.error)}` : ""}</div>
+    ${plan ? `<p>${esc(plan.summary)}</p>` : ""}
+    ${requests ? `<h2>תמונות שצריך ממך</h2>${requests}` : ""}
+    ${video || image ? `<div class="preview">${video ? `<video src="${esc(local(video.url))}" controls playsinline></video>` : ""}${image ? `<img src="${esc(local(image.url))}" alt="תמונת שער"/>` : ""}</div>` : ""}
+    ${(plan?.renditions || []).map((x) => `<div class="rendition"><b>${esc(pname(x.platform))} · ${esc(FORMAT[x.format] ?? x.format)}</b>${esc(x.caption) || '<span class="muted">(בלי טקסט)</span>'}${x.hashtags.length ? "\n" + esc(x.hashtags.map((h) => "#" + h).join(" ")) : ""}</div>`).join("")}
+    ${r.issues.map((i) => `<div class="issue ${i.severity}">${i.severity === "error" ? "⛔" : "⚠️"} ${esc(i.platform)}: ${esc(i.message)}</div>`).join("")}
+    ${r.unlinked.map((p) => `<div class="issue warning">🔗 ${esc(p)}: החשבון לא מחובר, לא יפורסם שם</div>`).join("")}
+    ${(plan?.questionsForUser || []).map((q) => `<div class="muted">❓ ${esc(q)}</div>`).join("")}
+    ${d.publications.length ? `<h2>פרסום</h2>${d.publications.map((p) => `<div>${p.status === "published" ? "✅" : p.status === "failed" ? "❌" : "⏳"} ${esc(pname(p.platform))}
+        ${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">קישור</a>` : ""} ${p.error ? esc(p.error) : ""}</div>`).join("")}` : ""}
+    ${["awaiting_approval", "awaiting_assets"].includes(d.status) ? `
+      <h2>הערות</h2><textarea id="fb" placeholder="מה לשנות?"></textarea>
+      <div class="row">
+        ${d.status === "awaiting_approval" ? `<button class="primary" id="approve">✅ לפרסם בשמי</button>` : ""}
+        <button id="sendFb">✏️ שלח הערות</button><button id="cancel">❌ בטל</button>
+      </div>` : ""}`;
+  $("#detail").querySelectorAll("input[type=file]").forEach((inp) => inp.onchange = async () => {
+    const fd = new FormData(); fd.append("file", inp.files[0]);
+    await api(`/drafts/${d.id}/assets?requestId=${encodeURIComponent(inp.dataset.req)}`, { method: "POST", body: fd }); refresh();
+  });
+  $("#approve")?.addEventListener("click", async () => {
+    if (!confirm("לפרסם את הגרסה הזו בשמך?")) return;
+    try { await api(`/drafts/${d.id}/approve`, { method: "POST", json: { revisionHash: d.revisionHash } }); } catch (e) { alert(e.message); }
+    refresh();
+  });
+  $("#sendFb")?.addEventListener("click", async () => { const text = $("#fb").value.trim(); if (!text) return; await api(`/drafts/${d.id}/feedback`, { method: "POST", json: { text } }); refresh(); });
+  $("#cancel")?.addEventListener("click", async () => { await api(`/drafts/${d.id}/cancel`, { method: "POST" }); refresh(); });
+}
+
+boot();
+</script>
+</body>
+</html>

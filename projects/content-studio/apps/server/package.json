@@ -1,0 +1,15 @@
+{
+  "name": "@studio/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fastify/multipart": "^10.0.0",
+    "@studio/agent": "workspace:*",
+    "@studio/core": "workspace:*",
+    "@studio/media": "workspace:*",
+    "@studio/publishers": "workspace:*",
+    "fastify": "^5.6.0",
+    "zod": "^4.1.0"
+  }
+}
